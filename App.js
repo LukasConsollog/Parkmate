@@ -8,6 +8,8 @@ import Add_Edit_Car from "./components/Add_edit_Car";
 import CarList from "./components/CarList";
 import CarDetails from "./components/CarDetails";
 import MapScreen from "./components/MapView";
+import BookingScreen from "./components/BookingScreen";
+import MyBookings from "./components/MyBookings";
 
 // Database config
 const firebaseConfig = {
@@ -48,6 +50,16 @@ function StackNavigation() {
         component={MapScreen}
         options={{ title: "Map" }}
       />
+      <Stack.Screen
+        name="BookingScreen"
+        component={BookingScreen}
+        options={{ title: "Book Parking Spot" }} // Booking skærm med titel
+      />
+      <Stack.Screen
+        name="MyBookings"
+        component={MyBookings}
+        options={{ title: "My Bookings" }} // MyBookings skærm med titel
+      />
     </Stack.Navigator>
   );
 }
@@ -81,6 +93,15 @@ export default function App() {
             tabBarIcon: () => <Ionicons name="map" size={20} />,
             headerShown: null,
             title: "Map",
+          }}
+        />
+        <Tab.Screen
+          name="MyBookings"
+          component={MyBookings}
+          options={{
+            tabBarIcon: () => <Ionicons name="bookmark" size={20} />,
+            headerShown: null,
+            title: "My Bookings",
           }}
         />
       </Tab.Navigator>
@@ -224,5 +245,34 @@ export const styles = StyleSheet.create({
     marginVertical: 10,
     width: "100%",
     alignItems: "center",
+  },
+  parkingSpaceContainer: {
+    width: "100%",
+    marginVertical: 8,
+    padding: 10,
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    borderColor: "#ddd",
+    borderWidth: 1,
+  },
+  selectedParkingSpace: {
+    backgroundColor: "#d4edda",
+    borderColor: "#28a745",
+  },
+  bookButton: {
+    backgroundColor: "#ccc",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  bookButtonActive: {
+    backgroundColor: "#28a745", // aktiv grøn
+  },
+  bookButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

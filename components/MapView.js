@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Dimensions, Text } from "react-native";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import MapView, { Marker, Callout, PROVIDER_DEFAULT } from "react-native-maps";
 import axios from "axios";
 import { getDatabase, ref, onValue } from "firebase/database";
 
-const MapScreen = () => {
-  const [addresses, setAddresses] = useState([]); // State til at holde adresser
-  const [markers, setMarkers] = useState([]); // State til at holde markører
+const MapScreen = ({ navigation }) => {
+  const [addresses, setAddresses] = useState([]); // State til adresser
+  const [markers, setMarkers] = useState([]); // State til markører
 
   // useEffect hook til at hente data fra Firebase
   useEffect(() => {
@@ -16,7 +22,10 @@ const MapScreen = () => {
     onValue(carsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const carsArray = Object.values(data);
+        const carsArray = Object.entries(data).map(([id, car]) => ({
+          id,
+          ...car,
+        }));
         setAddresses(carsArray);
       }
     });
@@ -28,7 +37,6 @@ const MapScreen = () => {
       const newMarkers = [];
       for (const address of addresses) {
         const fullAddress = `${address.postnummer.trim()} ${address.by.trim()}, ${address.gadenavn.trim()} ${address.gadenummer.trim()},`;
-        // console.log(`Geocoding address: ${fullAddress}`); // fy føj fejl tester (Har du tastet adressen rigtigt?)
         try {
           const response = await axios.get(
             "https://nominatim.openstreetmap.org/search",
@@ -41,13 +49,14 @@ const MapScreen = () => {
               },
             }
           );
-          // console.log(`Geocoding response for ${fullAddress}:`, response.data); // tjek
           if (response.data.length > 0) {
             const { lat, lon } = response.data[0];
             newMarkers.push({
               latitude: parseFloat(lat),
               longitude: parseFloat(lon),
               title: fullAddress,
+              id: address.id, // id til booking
+              address, // address data
             });
           } else {
             console.warn(`No results found for ${fullAddress}`);
@@ -56,7 +65,6 @@ const MapScreen = () => {
           console.error(`Error geocoding ${fullAddress}:`, error);
         }
       }
-      // console.log("New markers:", newMarkers); // tjek
       setMarkers(newMarkers);
     };
 
@@ -65,6 +73,10 @@ const MapScreen = () => {
     }
   }, [addresses]);
 
+  const handleBook = (marker) => {
+    navigation.navigate("BookingScreen", { marker });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Available Parking Locations</Text>
@@ -72,7 +84,7 @@ const MapScreen = () => {
         provider={PROVIDER_DEFAULT}
         style={styles.map}
         initialRegion={{
-          // Data for danmark
+          // Data for Danmark
           latitude: 56.26392,
           longitude: 9.501785,
           latitudeDelta: 2.0,
@@ -88,7 +100,19 @@ const MapScreen = () => {
               longitude: marker.longitude,
             }}
             title={marker.title}
-          />
+          >
+            <Callout>
+              <View style={styles.callout}>
+                <Text>{marker.title}</Text>
+                <TouchableOpacity
+                  style={styles.bookButton}
+                  onPress={() => handleBook(marker)}
+                >
+                  <Text style={styles.bookButtonText}>Book</Text>
+                </TouchableOpacity>
+              </View>
+            </Callout>
+          </Marker>
         ))}
       </MapView>
     </View>
@@ -118,5 +142,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ddd",
+  },
+  callout: {
+    width: 150,
+    alignItems: "center",
+  },
+  bookButton: {
+    backgroundColor: "#007BFF",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    alignItems: "center",
+  },
+  bookButtonText: {
+    color: "#fff",
+    fontSize: 14,
   },
 });

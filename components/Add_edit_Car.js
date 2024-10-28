@@ -32,7 +32,10 @@ const Add_Edit_Car = ({ navigation, route }) => {
 
   // Funktion til at tilføje en ny parkeringsplads
   const handleAddParkingSpace = () => {
-    setParkingSpaces([...parkingSpaces, { kvadratmeter: "", price: "" }]);
+    setParkingSpaces([
+      ...parkingSpaces,
+      { kvadratmeter: "", price: "", startTime: "", endTime: "" },
+    ]);
   };
 
   // Funktion til at fjerne en parkeringsplads
@@ -122,6 +125,22 @@ const Add_Edit_Car = ({ navigation, route }) => {
             value={space.price}
             onChangeText={(value) =>
               handleParkingSpaceChange(index, "price", value)
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Tidsinterval Start(fx. 08:00)"
+            value={space.startTime}
+            onChangeText={(value) =>
+              handleParkingSpaceChange(index, "startTime", value)
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Tidsinterval Slut (fx 18:00)"
+            value={space.endTime}
+            onChangeText={(value) =>
+              handleParkingSpaceChange(index, "endTime", value)
             }
           />
           <TouchableOpacity onPress={() => handleRemoveParkingSpace(index)}>
