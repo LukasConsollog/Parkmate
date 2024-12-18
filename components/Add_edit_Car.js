@@ -152,7 +152,7 @@ const Add_Edit_Car = ({ navigation, route }) => {
         style={styles.addButton}
         onPress={handleAddParkingSpace}
       >
-        <Text style={styles.addButtonText}>Add Parking Space</Text>
+        <Text style={styles.addButtonText}>Add Address</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save</Text>

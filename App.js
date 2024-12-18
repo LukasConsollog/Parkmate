@@ -1,9 +1,12 @@
-import { StyleSheet } from "react-native"; // Added Button import
+import React, { useState } from "react";
+import { StyleSheet } from "react-native";
 import { getApps, initializeApp } from "firebase/app";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+
+// Import screens for the main app
 import Add_Edit_Car from "./components/Add_edit_Car";
 import CarList from "./components/CarList";
 import CarDetails from "./components/CarDetails";
@@ -11,34 +14,41 @@ import MapScreen from "./components/MapView";
 import BookingScreen from "./components/BookingScreen";
 import MyBookings from "./components/MyBookings";
 
-// Database config
+// Import screens for authentication flow
+import LoginScreen from "./components/LoginScreen";
+import CreateUserScreen from "./components/CreateUserScreen";
+
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBosJ1Ghx2J40IrNzsA2EMImjK6VG3lM",
   authDomain: "database-80e9c.firebaseapp.com",
   databaseURL:
-    "https://database-80e9c-default-rtdb.europe-west1.firebasedatabase.app", // Updated database URL
+    "https://database-80e9c-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "database-80e9c",
   storageBucket: "database-80e9c.appspot.com",
   messagingSenderId: "381754416130",
   appId: "1:754416130:web:70d37f673ef6194cb59b1b",
 };
 
-// Vi kontrollerer at der ikke allerede er en initialiseret instans af firebase
-// Så undgår vi fejlen Firebase App named '[DEFAULT]' already exists (app/duplicate-app).
+// Initialize Firebase
 if (getApps().length < 1) {
   initializeApp(firebaseConfig);
   console.log("Firebase On!");
 }
-// stack navigator oprettelse
+
+// Create Stack Navigators
 const Stack = createStackNavigator();
-// Bund navigator
 const Tab = createBottomTabNavigator();
 
-// Navigation mellem skærme
-function StackNavigation() {
+// Main App Stack
+function AppStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="CarList" component={CarList} />
+      <Stack.Screen
+        name="CarList" // default
+        component={CarList}
+        options={{ title: "Car List" }}
+      />
       <Stack.Screen name="CarDetails" component={CarDetails} />
       <Stack.Screen
         name="Add_Edit_Car"
@@ -53,63 +63,85 @@ function StackNavigation() {
       <Stack.Screen
         name="BookingScreen"
         component={BookingScreen}
-        options={{ title: "Book Parking Spot" }} // Booking skærm med titel
+        options={{ title: "Book Parking Spot" }}
       />
       <Stack.Screen
         name="MyBookings"
         component={MyBookings}
-        options={{ title: "My Bookings" }} // MyBookings skærm med titel
+        options={{ title: "My Bookings" }}
       />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="CreateUser" component={CreateUserScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleAuthentication = () => {
+    setIsAuthenticated(true);
+  };
+
+  const AuthStack = () => (
+    <Stack.Navigator>
+      <Stack.Screen name="Login">
+        {(props) => (
+          <LoginScreen {...props} onLoginSuccess={handleAuthentication} />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="CreateUser" component={CreateUserScreen} />
+    </Stack.Navigator>
+  );
+
   return (
-    // De forskellige nederste navigationer med styling og title
     <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen
-          name="Home"
-          component={StackNavigation}
-          options={{
-            tabBarIcon: () => <Ionicons name="home" size={20} />,
-            headerShown: null,
-          }}
-        />
-        <Tab.Screen
-          name="Add_Edit_Car"
-          component={Add_Edit_Car}
-          options={{
-            tabBarIcon: () => <Ionicons name="add" size={20} />,
-            headerShown: null,
-            title: "Enter Address",
-          }}
-        />
-        <Tab.Screen
-          name="Map"
-          component={MapScreen}
-          options={{
-            tabBarIcon: () => <Ionicons name="map" size={20} />,
-            headerShown: null,
-            title: "Map",
-          }}
-        />
-        <Tab.Screen
-          name="MyBookings"
-          component={MyBookings}
-          options={{
-            tabBarIcon: () => <Ionicons name="bookmark" size={20} />,
-            headerShown: null,
-            title: "My Bookings",
-          }}
-        />
-      </Tab.Navigator>
+      {isAuthenticated ? (
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Home"
+            component={AppStack}
+            options={{
+              tabBarIcon: () => <Ionicons name="home" size={20} />,
+              headerShown: null,
+            }}
+          />
+          <Tab.Screen
+            name="Add_Edit_Car"
+            component={Add_Edit_Car}
+            options={{
+              tabBarIcon: () => <Ionicons name="add" size={20} />,
+              headerShown: null,
+              title: "Enter Address",
+            }}
+          />
+          <Tab.Screen
+            name="Map"
+            component={MapScreen}
+            options={{
+              tabBarIcon: () => <Ionicons name="map" size={20} />,
+              headerShown: null,
+              title: "Map",
+            }}
+          />
+          <Tab.Screen
+            name="MyBookings"
+            component={MyBookings}
+            options={{
+              tabBarIcon: () => <Ionicons name="bookmark" size={20} />,
+              headerShown: null,
+              title: "My Bookings",
+            }}
+          />
+        </Tab.Navigator>
+      ) : (
+        <AuthStack />
+      )}
     </NavigationContainer>
   );
 }
 
-// Global Styling for alle mine componenter
+// Global Styling for alle mine komponenter
 export const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -269,7 +301,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   bookButtonActive: {
-    backgroundColor: "#28a745", // aktiv grøn
+    backgroundColor: "#28a745", // grøn vedaktiv
   },
   bookButtonText: {
     color: "#fff",
